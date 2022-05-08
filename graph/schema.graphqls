@@ -1,0 +1,61 @@
+type Note {
+  _id: String!
+  title: String!
+  content: String!
+  createdAt: Number!
+  updatedAt: Number
+  createdBy: User
+}
+
+type User {
+  _id: ID!
+  name: String!
+  email: String!
+  password: String!
+  createdAt: Number!
+  updatedAt: Number
+  notes: [Note]
+  refreshToken: String
+}
+
+type Auth {
+  token: String!
+  user: User!
+  refreshToken: String!
+}
+
+type Query {
+  notes: [Note]
+  users: [User]
+  user(id: ID!): User!
+  note(id: ID!): Note!
+  me: User
+}
+
+input NewNote {
+  title: String!
+  content: String!
+}
+
+input UpdateNote {
+  title: String
+  content: String
+}
+
+input NewUser {
+  name: String!
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  createNote(input: NewNote!): Note!
+  createUser(input: NewUser!): User!
+  updateNote(id: ID!, input: UpdateNote!): Note!
+  deleteNote(id: ID!): Boolean
+  deleteUser(id: ID!): Boolean
+
+  login(email: String!, password: String!): Auth!
+  register(input: NewUser!): Auth!
+  refreshToken(token: String!): Auth!
+}
