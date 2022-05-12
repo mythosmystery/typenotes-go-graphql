@@ -11,11 +11,55 @@ import (
 	"github.com/mythosmystery/typenotes-go-graphql/graph/model"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) (*model.Note, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) UpdateNote(ctx context.Context, id string, input model.UpdateNote) (*model.Note, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteNote(ctx context.Context, id string) (*bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.Auth, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) Register(ctx context.Context, input model.NewUser) (*model.Auth, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*model.Auth, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Note(ctx context.Context, id string) (*model.Note, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
