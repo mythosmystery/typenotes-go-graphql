@@ -19,27 +19,7 @@ type NewUser struct {
 	Password string `json:"password"`
 }
 
-type Note struct {
-	ID        string `json:"_id"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	CreatedAt int    `json:"createdAt"`
-	UpdatedAt *int   `json:"updatedAt"`
-	CreatedBy *User  `json:"createdBy"`
-}
-
 type UpdateNote struct {
 	Title   *string `json:"title"`
 	Content *string `json:"content"`
-}
-
-type User struct {
-	ID           string  `json:"_id"`
-	Name         string  `json:"name"`
-	Email        string  `json:"email"`
-	Password     string  `json:"password"`
-	CreatedAt    int     `json:"createdAt"`
-	UpdatedAt    *int    `json:"updatedAt"`
-	Notes        []*Note `json:"notes"`
-	RefreshToken *string `json:"refreshToken"`
 }

@@ -79,14 +79,13 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		CreatedAt    func(childComplexity int) int
-		Email        func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Name         func(childComplexity int) int
-		Notes        func(childComplexity int) int
-		Password     func(childComplexity int) int
-		RefreshToken func(childComplexity int) int
-		UpdatedAt    func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Email     func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Notes     func(childComplexity int) int
+		Password  func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 }
 
@@ -369,13 +368,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Password(childComplexity), true
 
-	case "User.refreshToken":
-		if e.complexity.User.RefreshToken == nil {
-			break
-		}
-
-		return e.complexity.User.RefreshToken(childComplexity), true
-
 	case "User.updatedAt":
 		if e.complexity.User.UpdatedAt == nil {
 			break
@@ -471,7 +463,6 @@ type User {
   createdAt: Int!
   updatedAt: Int
   notes: [Note]
-  refreshToken: String
 }
 
 type Auth {
@@ -841,8 +832,6 @@ func (ec *executionContext) fieldContext_Auth_user(ctx context.Context, field gr
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "notes":
 				return ec.fieldContext_User_notes(ctx, field)
-			case "refreshToken":
-				return ec.fieldContext_User_refreshToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1016,8 +1005,6 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "notes":
 				return ec.fieldContext_User_notes(ctx, field)
-			case "refreshToken":
-				return ec.fieldContext_User_refreshToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1556,9 +1543,9 @@ func (ec *executionContext) _Note_createdAt(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Note_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1597,9 +1584,9 @@ func (ec *executionContext) _Note_updatedAt(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Note_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1665,8 +1652,6 @@ func (ec *executionContext) fieldContext_Note_createdBy(ctx context.Context, fie
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "notes":
 				return ec.fieldContext_User_notes(ctx, field)
-			case "refreshToken":
-				return ec.fieldContext_User_refreshToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1779,8 +1764,6 @@ func (ec *executionContext) fieldContext_Query_users(ctx context.Context, field 
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "notes":
 				return ec.fieldContext_User_notes(ctx, field)
-			case "refreshToken":
-				return ec.fieldContext_User_refreshToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1841,8 +1824,6 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "notes":
 				return ec.fieldContext_User_notes(ctx, field)
-			case "refreshToken":
-				return ec.fieldContext_User_refreshToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -1980,8 +1961,6 @@ func (ec *executionContext) fieldContext_Query_me(ctx context.Context, field gra
 				return ec.fieldContext_User_updatedAt(ctx, field)
 			case "notes":
 				return ec.fieldContext_User_notes(ctx, field)
-			case "refreshToken":
-				return ec.fieldContext_User_refreshToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -2320,9 +2299,9 @@ func (ec *executionContext) _User_createdAt(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2361,9 +2340,9 @@ func (ec *executionContext) _User_updatedAt(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOInt2int64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2429,47 +2408,6 @@ func (ec *executionContext) fieldContext_User_notes(ctx context.Context, field g
 				return ec.fieldContext_Note_createdBy(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Note", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _User_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_refreshToken(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RefreshToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_User_refreshToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4753,10 +4691,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 
 			out.Values[i] = ec._User_notes(ctx, field, obj)
 
-		case "refreshToken":
-
-			out.Values[i] = ec._User_refreshToken(ctx, field, obj)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5130,13 +5064,13 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
+func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
+func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	res := graphql.MarshalInt64(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -5482,19 +5416,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {
+	res, err := graphql.UnmarshalInt64(v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalInt(*v)
+func (ec *executionContext) marshalOInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
+	res := graphql.MarshalInt64(v)
 	return res
 }
 

@@ -6,13 +6,30 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/mythosmystery/typenotes-go-graphql/graph/generated"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+	result, err := r.DB.Note.InsertOne(ctx, model.Note{
+		Title:     input.Title,
+		Content:   input.Content,
+		CreatedAt: time.Now().UnixMilli(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	res := r.DB.Note.FindOne(ctx, bson.M{"_id": result.InsertedID.(primitive.ObjectID)})
+	var note model.Note
+	err = res.Decode(&note)
+	if err != nil {
+		return nil, err
+	}
+	return &note, nil
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
@@ -44,11 +61,23 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*mod
 }
 
 func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+	cursor, err := r.DB.Note.Find(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	var notes []*model.Note
+	cursor.All(ctx, &notes)
+	return notes, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	cursor, err := r.DB.User.Find(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	var users []*model.User
+	cursor.All(ctx, &users)
+	return users, nil
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
