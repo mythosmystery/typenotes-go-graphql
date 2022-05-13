@@ -6,8 +6,10 @@ package graph
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/mythosmystery/typenotes-go-graphql/auth"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/generated"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,7 +35,26 @@ func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) 
 }
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	hash, err := auth.HashPassword(input.Password)
+	if err != nil {
+		return nil, err
+	}
+	result, err := r.DB.User.InsertOne(ctx, model.User{
+		Email:     input.Email,
+		Password:  hash,
+		Name:      input.Name,
+		CreatedAt: time.Now().UnixMilli(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	res := r.DB.User.FindOne(ctx, bson.M{"_id": result.InsertedID.(primitive.ObjectID)})
+	var user model.User
+	err = res.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *mutationResolver) UpdateNote(ctx context.Context, id string, input model.UpdateNote) (*model.Note, error) {
@@ -49,15 +70,62 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*bool, er
 }
 
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.Auth, error) {
-	panic(fmt.Errorf("not implemented"))
+	res := r.DB.User.FindOne(ctx, bson.M{"email": email})
+	var user model.User
+	err := res.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	if isValid := user.ValidatePassword(password); !isValid {
+		return nil, fmt.Errorf("invalid password")
+	}
+	token, refreshToken, err := auth.CreateTokens(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Auth{
+		Token:        token,
+		User:         &user,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (r *mutationResolver) Register(ctx context.Context, input model.NewUser) (*model.Auth, error) {
-	panic(fmt.Errorf("not implemented"))
+	user, err := r.CreateUser(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	token, refreshToken, err := auth.CreateTokens(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Auth{
+		Token:        token,
+		User:         user,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
-func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*model.Auth, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) RefreshTokens(ctx context.Context, token string) (*model.Auth, error) {
+	userClaim, err := auth.ParseToken(token, os.Getenv("REFRESH_TOKEN_SECRET"))
+	if err != nil {
+		return nil, err
+	}
+	result := r.DB.User.FindOne(ctx, bson.M{"_id": userClaim.ID})
+	var user model.User
+	err = result.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	token, refreshToken, err := auth.CreateTokens(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Auth{
+		Token:        token,
+		User:         &user,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
@@ -81,15 +149,31 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	res := r.DB.User.FindOne(ctx, bson.M{"_id": id})
+	var user model.User
+	err := res.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *queryResolver) Note(ctx context.Context, id string) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+	res := r.DB.Note.FindOne(ctx, bson.M{"_id": id})
+	var note model.Note
+	err := res.Decode(&note)
+	if err != nil {
+		return nil, err
+	}
+	return &note, nil
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := ctx.Value("user").(*model.User)
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+	return user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

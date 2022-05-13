@@ -1,5 +1,7 @@
 package model
 
+import "github.com/mythosmystery/typenotes-go-graphql/auth"
+
 type Note struct {
 	ID        string `json:"_id" bson:"_id,omitempty"`
 	Title     string `json:"title" bson:"title,omitempty"`
@@ -17,4 +19,8 @@ type User struct {
 	CreatedAt int64   `json:"createdAt" bson:"createdAt,omitempty"`
 	UpdatedAt int64   `json:"updatedAt" bson:"updatedAt,omitempty"`
 	Notes     []*Note `json:"notes" bson:"notes,omitempty"`
+}
+
+func (u *User) ValidatePassword(password string) bool {
+	return auth.ComparePassword(password, u.Password)
 }

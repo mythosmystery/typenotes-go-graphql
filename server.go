@@ -9,10 +9,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
-	"github.com/mythosmystery/typenotes-go-graphql/auth"
 	"github.com/mythosmystery/typenotes-go-graphql/database"
 	"github.com/mythosmystery/typenotes-go-graphql/graph"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/generated"
+	"github.com/mythosmystery/typenotes-go-graphql/middleware"
 )
 
 const defaultPort = "8080"
@@ -30,7 +30,7 @@ func main() {
 
 	router := chi.NewRouter()
 
-	router.Use(auth.Middleware(db))
+	router.Use(middleware.Auth(db))
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
 

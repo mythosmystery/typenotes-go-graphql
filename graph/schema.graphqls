@@ -56,5 +56,5 @@ type Mutation {
 
   login(email: String!, password: String!): Auth!
   register(input: NewUser!): Auth!
-  refreshToken(token: String!): Auth!
+  refreshTokens(token: String!): Auth!
 }
