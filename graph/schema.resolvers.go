@@ -12,15 +12,21 @@ import (
 	"github.com/mythosmystery/typenotes-go-graphql/auth"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/generated"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/model"
+	"github.com/mythosmystery/typenotes-go-graphql/middleware"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) (*model.Note, error) {
+	user := middleware.ForContext(ctx)
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
 	result, err := r.DB.Note.InsertOne(ctx, model.Note{
 		Title:     input.Title,
 		Content:   input.Content,
 		CreatedAt: time.Now().UnixMilli(),
+		CreatedBy: user,
 	})
 	if err != nil {
 		return nil, err
@@ -30,6 +36,17 @@ func (r *mutationResolver) CreateNote(ctx context.Context, input model.NewNote) 
 	err = res.Decode(&note)
 	if err != nil {
 		return nil, err
+	}
+	id, err := primitive.ObjectIDFromHex(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	update, err := r.DB.User.UpdateByID(ctx, id, bson.M{"$push": bson.M{"notes": note}})
+	if err != nil {
+		return nil, err
+	}
+	if update.ModifiedCount == 0 {
+		return nil, fmt.Errorf("user not found")
 	}
 	return &note, nil
 }
@@ -79,7 +96,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	if isValid := user.ValidatePassword(password); !isValid {
 		return nil, fmt.Errorf("invalid password")
 	}
-	token, refreshToken, err := auth.CreateTokens(user.ID)
+	token, refreshToken, _, err := auth.CreateTokens(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +112,7 @@ func (r *mutationResolver) Register(ctx context.Context, input model.NewUser) (*
 	if err != nil {
 		return nil, err
 	}
-	token, refreshToken, err := auth.CreateTokens(user.ID)
+	token, refreshToken, _, err := auth.CreateTokens(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +134,7 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, token string) (*mo
 	if err != nil {
 		return nil, err
 	}
-	token, refreshToken, err := auth.CreateTokens(user.ID)
+	token, refreshToken, _, err := auth.CreateTokens(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +146,7 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, token string) (*mo
 }
 
 func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
-	cursor, err := r.DB.Note.Find(ctx, nil)
+	cursor, err := r.DB.Note.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +156,7 @@ func (r *queryResolver) Notes(ctx context.Context) ([]*model.Note, error) {
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	cursor, err := r.DB.User.Find(ctx, nil)
+	cursor, err := r.DB.User.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, err
 	}
@@ -149,13 +166,8 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	res := r.DB.User.FindOne(ctx, bson.M{"_id": id})
-	var user model.User
-	err := res.Decode(&user)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+	user, err := model.GetUserById(id, r.DB)
+	return user, err
 }
 
 func (r *queryResolver) Note(ctx context.Context, id string) (*model.Note, error) {
@@ -169,7 +181,7 @@ func (r *queryResolver) Note(ctx context.Context, id string) (*model.Note, error
 }
 
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	user := ctx.Value("user").(*model.User)
+	user := middleware.ForContext(ctx)
 	if user == nil {
 		return nil, fmt.Errorf("user not found")
 	}

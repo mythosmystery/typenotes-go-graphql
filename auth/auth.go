@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -42,28 +43,31 @@ func ParseToken(tokenString, secret string) (*UserClaims, error) {
 	if err != nil {
 		return nil, err
 	}
-	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
-		return claims, nil
+	if claims, ok := token.Claims.(*UserClaims); ok {
+		if token.Valid {
+			return claims, nil
+		}
+		return nil, fmt.Errorf("expired token")
 	}
-	return nil, err
+	return nil, fmt.Errorf("invalid token")
 }
 
-func CreateTokens(id string) (string, string, error) {
+func CreateTokens(id string) (string, string, string, error) {
 	token, err := CreateToken(id, os.Getenv("TOKEN_SECRET"), time.Minute)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
-	refreshToken, err := CreateToken(id, os.Getenv("REFRESH_TOKEN"), time.Hour*24*7)
+	refreshToken, err := CreateToken(id, os.Getenv("REFRESH_SECRET"), time.Hour*24*7)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
-	return token, refreshToken, nil
+	return token, refreshToken, id, nil
 }
 
-func RefreshTokens(refreshToken string) (string, string, error) {
+func RefreshTokens(refreshToken string) (string, string, string, error) {
 	claims, err := ParseToken(refreshToken, os.Getenv("REFRESH_SECRET"))
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 	return CreateTokens(claims.UserID)
 }
