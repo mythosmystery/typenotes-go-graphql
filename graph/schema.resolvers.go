@@ -75,15 +75,60 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 }
 
 func (r *mutationResolver) UpdateNote(ctx context.Context, id string, input model.UpdateNote) (*model.Note, error) {
-	panic(fmt.Errorf("not implemented"))
+	_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	res, err := r.DB.Note.UpdateByID(ctx, _id, bson.M{"$set": bson.M{
+		"title":     input.Title,
+		"content":   input.Content,
+		"updatedAt": time.Now().UnixMilli(),
+	}})
+	if err != nil {
+		return nil, err
+	}
+	if res.MatchedCount == 0 {
+		return nil, fmt.Errorf("note not found")
+	}
+	result := r.DB.Note.FindOne(ctx, bson.M{"_id": _id})
+	var note model.Note
+	err = result.Decode(&note)
+	if err != nil {
+		return nil, err
+	}
+	return &note, nil
 }
 
 func (r *mutationResolver) DeleteNote(ctx context.Context, id string) (*bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	res, err := r.DB.Note.DeleteOne(ctx, bson.M{"_id": _id})
+	if err != nil {
+		return nil, err
+	}
+	if res.DeletedCount == 0 {
+		return nil, fmt.Errorf("note not found")
+	}
+	success := true
+	return &success, nil
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	res, err := r.DB.User.DeleteOne(ctx, bson.M{"_id": _id})
+	if err != nil {
+		return nil, err
+	}
+	if res.DeletedCount == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+	success := true
+	return &success, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.Auth, error) {

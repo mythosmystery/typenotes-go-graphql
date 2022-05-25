@@ -46,6 +46,6 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("connect to http://localhost:%s/gql for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, corsHandler.Handler(router)))
 }
