@@ -124,13 +124,11 @@ func (r *mutationResolver) Register(ctx context.Context, input model.NewUser) (*
 }
 
 func (r *mutationResolver) RefreshTokens(ctx context.Context, token string) (*model.Auth, error) {
-	userClaim, err := auth.ParseToken(token, os.Getenv("REFRESH_TOKEN_SECRET"))
+	userClaim, err := auth.ParseToken(token, os.Getenv("REFRESH_SECRET"))
 	if err != nil {
 		return nil, err
 	}
-	result := r.DB.User.FindOne(ctx, bson.M{"_id": userClaim.ID})
-	var user model.User
-	err = result.Decode(&user)
+	user, err := model.GetUserById(userClaim.UserID, r.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +138,7 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, token string) (*mo
 	}
 	return &model.Auth{
 		Token:        token,
-		User:         &user,
+		User:         user,
 		RefreshToken: refreshToken,
 	}, nil
 }
@@ -171,7 +169,8 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 }
 
 func (r *queryResolver) Note(ctx context.Context, id string) (*model.Note, error) {
-	res := r.DB.Note.FindOne(ctx, bson.M{"_id": id})
+	noteID, _ := primitive.ObjectIDFromHex(id)
+	res := r.DB.Note.FindOne(ctx, bson.M{"_id": noteID})
 	var note model.Note
 	err := res.Decode(&note)
 	if err != nil {

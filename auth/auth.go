@@ -53,7 +53,7 @@ func ParseToken(tokenString, secret string) (*UserClaims, error) {
 }
 
 func CreateTokens(id string) (string, string, string, error) {
-	token, err := CreateToken(id, os.Getenv("TOKEN_SECRET"), time.Minute)
+	token, err := CreateToken(id, os.Getenv("TOKEN_SECRET"), time.Minute*15)
 	if err != nil {
 		return "", "", "", err
 	}

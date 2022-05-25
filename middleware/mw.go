@@ -22,23 +22,23 @@ func Auth(db *database.DB) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token := r.Header.Get("x-token")
 			if token == "" {
-				log.Println("no token")
+				log.Println("token is empty")
 				next.ServeHTTP(w, r)
 				return
 			}
 
 			claims, err := auth.ParseToken(token, os.Getenv("TOKEN_SECRET"))
 			if err != nil || claims == nil {
+				log.Println("invalid token, refreshing", err)
 				refreshToken := r.Header.Get("x-refresh-token")
 				if refreshToken == "" {
 					log.Println("refresh token is empty")
 					next.ServeHTTP(w, r)
 					return
 				}
-				log.Println("Refreshing token")
 				newToken, newRefreshToken, userID, err := auth.RefreshTokens(refreshToken)
 				if err != nil {
-					log.Println("refresh tokens err ", err)
+					log.Println("error refreshing token", err)
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
 				}
@@ -46,6 +46,7 @@ func Auth(db *database.DB) func(http.Handler) http.Handler {
 				w.Header().Set("X-Refresh-Token", newRefreshToken)
 				user, err := model.GetUserById(userID, db)
 				if err != nil {
+					log.Println("error getting user", err)
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
 				}
@@ -57,6 +58,7 @@ func Auth(db *database.DB) func(http.Handler) http.Handler {
 			if ForContext(r.Context()) == nil && claims != nil {
 				user, err := model.GetUserById(claims.UserID, db)
 				if err != nil {
+					log.Println("error getting user", err)
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 					return
 				}
