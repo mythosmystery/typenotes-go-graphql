@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+  typenotes-mongo:
+    image: mongo:5.0.2
+    container_name: typenotes-mongo
+    restart: always
+    ports:
+      - 27019:27017
+    volumes:
+      - db:/data/db
+    networks:
+      - typenotes-network
+
+  typenotes-client:
+    container_name: typenotes-client
+    restart: always
+    build: 
+      context: ../typenotes-next
+      dockerfile: ../typenotes-next/Dockerfile
+    ports:
+      - 8005:3000
+    depends_on:
+      - typenotes-server
+    networks:
+      - typenotes-network
+  
+  typenotes-server:
+    container_name: typenotes-server
+    build: 
+      context: ./
+    restart: always
+    ports:
+      - 4001:3001
+    depends_on:
+      - typenotes-mongo
+    environment:
+      - MONGO_URI=mongodb://typenotes-mongo:27017/typenotes
+      - TOKEN_SECRET=secretasdfasdfasdfsflhseo8ryfo84fsloijfe
+      - REFRESH_SECRET=secretasdfasdfasdflkjjgfghdfhladskjlksdjf
+      - MONGO_DB=typenotes
+    networks:
+      - typenotes-network
+
+volumes:
+  db:
+
+networks:
+  typenotes-network:
+    driver: bridge

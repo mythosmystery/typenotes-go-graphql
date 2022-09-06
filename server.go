@@ -8,7 +8,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
-	"github.com/joho/godotenv"
 	"github.com/mythosmystery/typenotes-go-graphql/database"
 	"github.com/mythosmystery/typenotes-go-graphql/graph"
 	"github.com/mythosmystery/typenotes-go-graphql/graph/generated"
@@ -19,9 +18,9 @@ import (
 const defaultPort = "3001"
 
 func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		panic(err)
-	}
+	// if err := godotenv.Load(".env"); err != nil {
+	// 	panic(err)
+	// }
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -40,7 +39,7 @@ func main() {
 	router.Handle("/query", srv)
 
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://typenotes-client:3000"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "x-token", "x-refresh-token"},
 		ExposedHeaders:   []string{"X-Token", "X-Refresh-Token"},
 		AllowCredentials: true,
