@@ -16,8 +16,7 @@ services:
     container_name: typenotes-client
     restart: always
     build: 
-      context: ../typenotes-next
-      dockerfile: ../typenotes-next/Dockerfile
+      context: ./typenotes-next
     ports:
       - 8005:3000
     depends_on:
@@ -28,7 +27,7 @@ services:
   typenotes-server:
     container_name: typenotes-server
     build: 
-      context: ./
+      context: ./typenotes-go-graphql
     restart: always
     ports:
       - 4001:3001
